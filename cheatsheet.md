@@ -1,10 +1,13 @@
-# 🧠 COMPLETE SQL REFERENCE (MySQL + PostgreSQL)
+# 🧠 Complete SQL Reference (MySQL + PostgreSQL)
 
-==================================================
+A comprehensive guide covering **everything** from database creation to advanced features, with examples for both **MySQL** and **PostgreSQL**.  
 
-1. DATABASE & SCHEMA MANAGEMENT (DDL)
-   ==================================================
+---
 
+## 🏗️ 1. Database & Schema Management (DDL)
+
+### Databases
+```sql
 -- Create database
 CREATE DATABASE mydb;
 
@@ -16,71 +19,68 @@ USE mydb;
 
 -- PostgreSQL equivalent
 SET search_path TO public;
+````
 
--- Create schema (Postgres mainly)
+### Schemas (PostgreSQL)
+
+```sql
 CREATE SCHEMA myschema;
-
--- Drop schema
 DROP SCHEMA myschema CASCADE;
+```
 
----
+### Tables
 
-## TABLES
-
+```sql
 -- Create table
 CREATE TABLE users (
-id INT PRIMARY KEY AUTO_INCREMENT, -- SERIAL in Postgres
-name VARCHAR(100) NOT NULL,
-email VARCHAR(100) UNIQUE,
-age INT CHECK (age >= 18),
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id INT PRIMARY KEY AUTO_INCREMENT, -- SERIAL in Postgres
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    age INT CHECK (age >= 18),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- PostgreSQL version
 CREATE TABLE users (
-id SERIAL PRIMARY KEY,
-name VARCHAR(100) NOT NULL,
-email VARCHAR(100) UNIQUE,
-age INT CHECK (age >= 18),
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    age INT CHECK (age >= 18),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+```
 
--- Alter table
+### Altering Tables
+
+```sql
 ALTER TABLE users ADD COLUMN phone VARCHAR(15);
-
--- Modify column
 ALTER TABLE users MODIFY name VARCHAR(150); -- MySQL
-ALTER TABLE users ALTER COLUMN name TYPE VARCHAR(150); -- Postgres
-
--- Rename column
+ALTER TABLE users ALTER COLUMN name TYPE VARCHAR(150); -- PostgreSQL
 ALTER TABLE users RENAME COLUMN name TO full_name;
-
--- Drop column
 ALTER TABLE users DROP COLUMN phone;
+```
 
--- Drop table
-DROP TABLE users;
+### Constraints
 
----
-
-## CONSTRAINTS
-
+```sql
 ALTER TABLE users ADD CONSTRAINT pk_user PRIMARY KEY (id);
 ALTER TABLE orders ADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id);
 ALTER TABLE users ADD CONSTRAINT unique_email UNIQUE (email);
 ALTER TABLE users ADD CONSTRAINT chk_age CHECK (age >= 18);
+```
 
-==================================================
-2. DATA MANIPULATION (DML)
-==========================
+---
 
--- Insert single row
-INSERT INTO users (name, email, age) VALUES ('John', '[john@example.com](mailto:john@example.com)', 25);
+## 📥 2. Data Manipulation (DML)
 
--- Insert multiple rows
+```sql
+-- Insert
+INSERT INTO users (name, email, age) VALUES ('John', 'john@example.com', 25);
+
+-- Insert multiple
 INSERT INTO users (name, email, age) VALUES
-('Alice', '[alice@example.com](mailto:alice@example.com)', 30),
-('Bob', '[bob@example.com](mailto:bob@example.com)', 22);
+('Alice', 'alice@example.com', 30),
+('Bob', 'bob@example.com', 22);
 
 -- Update
 UPDATE users SET age = 26 WHERE id = 1;
@@ -90,11 +90,11 @@ DELETE FROM users WHERE id = 1;
 
 -- Truncate
 TRUNCATE TABLE users;
+```
 
----
+### Upsert
 
-## UPSERT
-
+```sql
 -- MySQL
 INSERT INTO users (id, name) VALUES (1, 'John')
 ON DUPLICATE KEY UPDATE name = 'Updated';
@@ -102,11 +102,13 @@ ON DUPLICATE KEY UPDATE name = 'Updated';
 -- PostgreSQL
 INSERT INTO users (id, name) VALUES (1, 'John')
 ON CONFLICT (id) DO UPDATE SET name = 'Updated';
+```
 
-==================================================
-3. DATA QUERYING (DQL)
-======================
+---
 
+## 🔍 3. Data Querying (DQL)
+
+```sql
 -- Select
 SELECT * FROM users;
 
@@ -116,13 +118,13 @@ SELECT * FROM users WHERE age > 18;
 -- Order
 SELECT * FROM users ORDER BY age DESC;
 
--- Limit
+-- Limit & Offset
 SELECT * FROM users LIMIT 10 OFFSET 5;
+```
 
----
+### Joins
 
-## JOINS
-
+```sql
 SELECT u.name, o.amount
 FROM users u
 INNER JOIN orders o ON u.id = o.user_id;
@@ -132,45 +134,47 @@ RIGHT JOIN orders o ON u.id = o.user_id;
 
 -- PostgreSQL FULL JOIN
 FULL JOIN orders o ON u.id = o.user_id;
+```
 
----
+### Aggregation
 
-## AGGREGATION
-
+```sql
 SELECT COUNT(*), AVG(age), SUM(age)
 FROM users
 GROUP BY age
 HAVING COUNT(*) > 1;
+```
 
----
+### Subquery
 
-## SUBQUERY
-
+```sql
 SELECT name FROM users
 WHERE id IN (SELECT user_id FROM orders);
+```
 
----
+### Common Table Expression (CTE)
 
-## CTE
-
+```sql
 WITH adult_users AS (
-SELECT * FROM users WHERE age > 18
+    SELECT * FROM users WHERE age > 18
 )
 SELECT * FROM adult_users;
-
-==================================================
-4. ADVANCED FEATURES
-====================
-
--- Window functions
-SELECT name, ROW_NUMBER() OVER (ORDER BY age) FROM users;
-
-SELECT name, RANK() OVER (ORDER BY age DESC) FROM users;
+```
 
 ---
 
-## SET OPERATIONS
+## ⚡ 4. Advanced Features
 
+### Window Functions
+
+```sql
+SELECT name, ROW_NUMBER() OVER (ORDER BY age) FROM users;
+SELECT name, RANK() OVER (ORDER BY age DESC) FROM users;
+```
+
+### Set Operations
+
+```sql
 SELECT name FROM users
 UNION
 SELECT name FROM admins;
@@ -182,38 +186,46 @@ SELECT name FROM admins;
 SELECT name FROM users
 EXCEPT
 SELECT name FROM admins;
+```
 
-==================================================
-5. INDEXES
-==========
+---
 
+## ⚙️ 5. Indexes
+
+```sql
 CREATE INDEX idx_users_name ON users(name);
 CREATE UNIQUE INDEX idx_email ON users(email);
 
 -- PostgreSQL partial index
 CREATE INDEX idx_active_users ON users(name) WHERE age > 18;
 
--- Full-text
+-- Full-text index
 -- MySQL
 ALTER TABLE users ADD FULLTEXT(name);
 
 -- PostgreSQL
 CREATE INDEX idx_gin ON users USING GIN(to_tsvector('english', name));
+```
 
-==================================================
-6. USER & PERMISSIONS
-=====================
+---
 
+## 🔐 6. Users & Permissions
+
+```sql
+-- Create user
 CREATE USER 'test' IDENTIFIED BY 'password'; -- MySQL
-CREATE USER test WITH PASSWORD 'password'; -- Postgres
+CREATE USER test WITH PASSWORD 'password'; -- PostgreSQL
 
+-- Grant / Revoke
 GRANT SELECT, INSERT ON users TO test;
 REVOKE INSERT ON users FROM test;
+```
 
-==================================================
-7. TRANSACTIONS
-===============
+---
 
+## 🔄 7. Transactions
+
+```sql
 BEGIN;
 INSERT INTO users (name) VALUES ('Temp');
 ROLLBACK;
@@ -225,32 +237,36 @@ COMMIT;
 -- Savepoint
 SAVEPOINT sp1;
 ROLLBACK TO sp1;
+```
 
-==================================================
-8. FUNCTIONS & PROCEDURES
-=========================
+---
 
--- MySQL procedure
+## 🛠️ 8. Functions, Procedures & Triggers
+
+### Procedures
+
+```sql
+-- MySQL
 DELIMITER //
 CREATE PROCEDURE GetUsers()
 BEGIN
-SELECT * FROM users;
+    SELECT * FROM users;
 END //
 DELIMITER ;
 
--- PostgreSQL function
+-- PostgreSQL
 CREATE FUNCTION get_users()
 RETURNS TABLE(id INT, name TEXT)
 AS $$
 BEGIN
-RETURN QUERY SELECT id, name FROM users;
+    RETURN QUERY SELECT id, name FROM users;
 END;
 $$ LANGUAGE plpgsql;
+```
 
----
+### Triggers
 
-## TRIGGERS
-
+```sql
 -- MySQL
 CREATE TRIGGER before_insert_user
 BEFORE INSERT ON users
@@ -261,8 +277,8 @@ SET NEW.created_at = NOW();
 CREATE FUNCTION set_timestamp()
 RETURNS TRIGGER AS $$
 BEGIN
-NEW.created_at = NOW();
-RETURN NEW;
+    NEW.created_at = NOW();
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -270,48 +286,37 @@ CREATE TRIGGER trg_users
 BEFORE INSERT ON users
 FOR EACH ROW
 EXECUTE FUNCTION set_timestamp();
+```
 
-==================================================
-9. VIEWS
-========
+---
 
+## 👀 9. Views
+
+```sql
 CREATE VIEW adult_users AS
 SELECT * FROM users WHERE age > 18;
 
 -- PostgreSQL materialized view
 CREATE MATERIALIZED VIEW mat_users AS
 SELECT * FROM users;
+```
 
-==================================================
-10. DATA TYPES
-==============
+---
 
--- Numeric
-INT, BIGINT, DECIMAL
+## 🧩 10. Data Types
 
--- String
-VARCHAR, TEXT
+* Numeric: `INT`, `BIGINT`, `DECIMAL`
+* String: `VARCHAR`, `TEXT`
+* Date: `DATE`, `TIMESTAMP`
+* Boolean: `BOOLEAN`
+* JSON: MySQL `JSON`, PostgreSQL `JSONB`
+* Arrays: PostgreSQL `INT[]`
 
--- Date
-DATE, TIMESTAMP
+---
 
--- Boolean
-BOOLEAN
+## 🛠️ 11. Utilities
 
--- JSON
--- MySQL
-JSON
-
--- PostgreSQL
-JSONB
-
--- Array (Postgres only)
-INT[]
-
-==================================================
-11. UTILITIES
-=============
-
+```sql
 -- MySQL
 SHOW TABLES;
 DESCRIBE users;
@@ -319,40 +324,43 @@ DESCRIBE users;
 -- PostgreSQL
 \dt
 \d users
+```
 
-==================================================
-12. PERFORMANCE & ANALYSIS
-==========================
+---
 
--- Explain query
-EXPLAIN SELECT * FROM users;
+## 🚀 12. Performance & Analysis
 
--- PostgreSQL analyze
-EXPLAIN ANALYZE SELECT * FROM users;
+```sql
+EXPLAIN SELECT * FROM users;       -- MySQL & Postgres
+EXPLAIN ANALYZE SELECT * FROM users; -- PostgreSQL only
+```
 
-==================================================
-13. LOCKING & CONCURRENCY
-=========================
+---
 
+## 🔒 13. Locking & Concurrency
+
+```sql
 SELECT * FROM users FOR UPDATE;
 SELECT * FROM users FOR SHARE;
+```
 
-==================================================
-14. PARTITIONING
-================
+---
 
--- PostgreSQL
+## 📂 14. Partitioning (PostgreSQL)
+
+```sql
 CREATE TABLE users_partitioned (
-id INT,
-created_at DATE
+    id INT,
+    created_at DATE
 ) PARTITION BY RANGE (created_at);
+```
 
-==================================================
-15. EXTENSIONS (PostgreSQL)
-===========================
+---
 
+## 🧩 15. Extensions (PostgreSQL)
+
+```sql
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+```
 
-==================================================
-END OF COMPLETE SQL REFERENCE
-=============================
+---
